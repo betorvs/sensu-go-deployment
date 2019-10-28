@@ -1,6 +1,6 @@
 # Sensu Go Deployment Chart
 
-These helm chart deploy Sensu-Go with external ETCD Cluster in Kubernetes.
+These helm chart deploy Sensu-Go with ETCD Cluster using etcd-operator chart in Kubernetes in the same namespace. 
 
 
 ## Usage
