@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sensu-go-deployment.fullname" . }}
+  labels:
+{{ include "sensu-go-deployment.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "sensu-go-deployment.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "sensu-go-deployment.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      initContainers:
+        - name: etcdtest
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ['sh', '-c', 'until etcdctl --endpoints {{ .Values.etcdEndpoint }} cluster-health; do echo waiting for etcd-cluster-client ; sleep 10; done;']
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.serviceWebsocket.name }}
+              containerPort: {{ .Values.serviceWebsocket.port }}
+              protocol: TCP
+            - name: {{ .Values.serviceApi.name }}
+              containerPort: {{ .Values.serviceApi.port }}
+              protocol: TCP
+            - name: {{ .Values.serviceDashboard.name }}
+              containerPort: {{ .Values.serviceDashboard.port }}
+              protocol: TCP
+          command: [ "sensu-backend" ]
+          args: [ "start", "--etcd-advertise-client-urls={{ .Values.etcdEndpoint }}", "--no-embed-etcd", "--log-level debug", "--debug" ]
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.service.healthPath }}
+              port: {{ .Values.serviceApi.port }}
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.service.healthPath }}
+              port: {{ .Values.serviceApi.port }}
+            initialDelaySeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
