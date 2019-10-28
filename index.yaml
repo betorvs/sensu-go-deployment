@@ -3,11 +3,11 @@ entries:
   sensu-go-deployment:
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-10-28T16:18:33.072218431Z"
+    created: "2019-10-28T16:57:09.16943739Z"
     description: A Helm chart for Kubernetes
-    digest: d6093c37e18e0349b0afd119d96c1bb1cf21663b3a92012dc5203dababc673c6
+    digest: 4ec6b55e9f53ce77a7920ce8cef624b669a64a96c93a43d59c91b35940d272c8
     name: sensu-go-deployment
     urls:
     - sensu-go-deployment-0.1.0.tgz
     version: 0.1.0
-generated: "2019-10-28T16:18:33.070107639Z"
+generated: "2019-10-28T16:57:09.167052419Z"
