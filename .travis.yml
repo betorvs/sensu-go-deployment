@@ -8,6 +8,7 @@ before_install:
 script:
   - mkdir docs
   - echo $(pwd)
+  - helm dependency update
   - helm package . -d docs
   - cp README.md docs
   - cd docs
